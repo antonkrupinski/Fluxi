@@ -266,9 +266,11 @@
 
       sessionStorage.setItem(SESSION_KEY, sessionToken);
 
-      window.location.href = user.role === 'admin'
-        ? 'admin-panel.html'
-        : 'fluxi-hub.html';
+      if (user.role === 'admin') {
+        window.location.href = 'admin-panel.html';
+      } else {
+        openFluxiHub();
+      }
     });
 
     (function(){
@@ -283,13 +285,30 @@
       if (!user) { sessionStorage.removeItem(SESSION_KEY); return; }
 
       if (Date.now() - decoded.timestamp < 3600000) {
-        window.location.href = decoded.role === 'admin'
-          ? 'admin-panel.html'
-          : 'fluxi-hub.html';
+        if (decoded.role === 'admin') {
+          window.location.href = 'admin-panel.html';
+        } else {
+          openFluxiHub();
+        }
       } else {
         sessionStorage.removeItem(SESSION_KEY);
       }
     })();
+
+    async function openFluxiHub() {
+      try {
+        const res = await fetch('fluxi-hub.html');
+        if (!res.ok) throw new Error('fetch-failed');
+        const html = await res.text();
+        const w = window.open('about:blank', '_blank');
+        if (!w) { window.location.href = 'fluxi-hub.html'; return; }
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+      } catch (e) {
+        window.location.href = 'fluxi-hub.html';
+      }
+    }
   </script>
 </body>
 </html>

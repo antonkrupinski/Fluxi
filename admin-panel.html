@@ -40,6 +40,21 @@
     function getUsers() { try { return JSON.parse(localStorage.getItem('flx_users') || '[]'); } catch { return []; } }
     function saveUsers(u) { localStorage.setItem('flx_users', JSON.stringify(u)); }
 
+    async function openFluxiHub() {
+      try {
+        const res = await fetch('fluxi-hub.html');
+        if (!res.ok) throw new Error('fetch-failed');
+        const html = await res.text();
+        const w = window.open('about:blank', '_blank');
+        if (!w) { window.location.href = 'fluxi-hub.html'; return; }
+        w.document.open();
+        w.document.write(html);
+        w.document.close();
+      } catch (e) {
+        window.location.href = 'fluxi-hub.html';
+      }
+    }
+
     const showUnauthorized = () => {
       const c = document.getElementById('content');
       c.innerHTML = `
@@ -72,10 +87,10 @@
           </div>
         </form>
 
-        <div class="actions" style="margin-top:18px">
-          <a class="button" href="fluxi-hub.html">Open Fluxi Hub</a>
-          <button id="logout" class="secondary">Logout</button>
-        </div>
+          <div class="actions" style="margin-top:18px">
+            <a class="button" id="openFluxiHub" href="fluxi-hub.html">Open Fluxi Hub</a>
+            <button id="logout" class="secondary">Logout</button>
+          </div>
       `;
 
       document.getElementById('logout').addEventListener('click', () => {
@@ -101,6 +116,13 @@
       });
 
       renderUserList(session.username);
+      const openBtn = document.getElementById('openFluxiHub');
+      if (openBtn) {
+        openBtn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          openFluxiHub();
+        });
+      }
     };
 
     function renderUserList(currentAdmin) {
